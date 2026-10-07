@@ -12,7 +12,6 @@ import android.webkit.WebViewClient;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -23,15 +22,12 @@ import androidx.media3.common.PlaybackException;
 import androidx.media3.common.Player;
 import androidx.media3.common.util.UnstableApi;
 import androidx.media3.exoplayer.ExoPlayer;
-import androidx.media3.exoplayer.hls.HlsMediaSource;
 import androidx.media3.datasource.DefaultHttpDataSource;
 import androidx.media3.ui.PlayerControlView;
 import androidx.media3.ui.PlayerView;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 
 @UnstableApi
 public class MainActivity extends AppCompatActivity {
@@ -143,28 +139,42 @@ public class MainActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_main);
 
-        // Find views
-        listView = findViewById(R.id.listView);
-        searchBox = findViewById(R.id.searchBox);
-        nowPlaying = findViewById(R.id.nowPlaying);
-        status = findViewById(R.id.status);
+        // =========================
+        // Find Views
+        // =========================
+        // Runtime resource lookup प्रयोग गरिएको छ।
+        // यसले R.id compile-symbol error बाट बचाउँछ।
 
-        tvPlayerView = findViewById(R.id.tvPlayerView);
-        radioControls = findViewById(R.id.radioControls);
+        listView = findViewById(viewId("listView"));
+        searchBox = findViewById(viewId("searchBox"));
+        nowPlaying = findViewById(viewId("nowPlaying"));
+        status = findViewById(viewId("status"));
 
-        tvWebView = findViewById(R.id.tvWebView);
+        tvPlayerView = findViewById(viewId("tvPlayerView"));
+        radioControls = findViewById(viewId("radioControls"));
 
-        stopButton = findViewById(R.id.stopButton);
+        tvWebView = findViewById(viewId("tvWebView"));
 
+        stopButton = findViewById(viewId("stopButton"));
+
+        // =========================
         // Initial UI
+        // =========================
+
         tvPlayerView.setVisibility(View.GONE);
         radioControls.setVisibility(View.GONE);
         tvWebView.setVisibility(View.GONE);
 
+        // =========================
         // Setup WebView
+        // =========================
+
         setupTvWebView();
 
-        // Setup list
+        // =========================
+        // Setup List
+        // =========================
+
         adapter = new ArrayAdapter<>(
                 this,
                 android.R.layout.simple_list_item_1,
@@ -176,7 +186,10 @@ public class MainActivity extends AppCompatActivity {
         // Default Radio list
         showRadioList();
 
-        // Item click
+        // =========================
+        // Item Click
+        // =========================
+
         listView.setOnItemClickListener((parent, view, position, id) -> {
 
             if (position < 0 || position >= displayUrls.size()) {
@@ -189,7 +202,10 @@ public class MainActivity extends AppCompatActivity {
             playSelected(name, url);
         });
 
+        // =========================
         // Search
+        // =========================
+
         searchBox.addTextChangedListener(
                 new android.text.TextWatcher() {
 
@@ -218,10 +234,35 @@ public class MainActivity extends AppCompatActivity {
                 }
         );
 
-        // Stop button
+        // =========================
+        // Stop Button
+        // =========================
+
         stopButton.setOnClickListener(v -> stopPlayback());
 
         status.setText("Ready");
+    }
+
+    // ============================================================
+    // RESOURCE ID FIX
+    // ============================================================
+
+    private int viewId(String name) {
+
+        int id = getResources().getIdentifier(
+                name,
+                "id",
+                getPackageName()
+        );
+
+        if (id == 0) {
+
+            throw new IllegalStateException(
+                    "Missing view ID in activity_main.xml: " + name
+            );
+        }
+
+        return id;
     }
 
     // ============================================================
