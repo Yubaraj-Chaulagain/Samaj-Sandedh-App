@@ -17,6 +17,8 @@ import androidx.media3.common.MimeTypes;
 import androidx.media3.common.PlaybackException;
 import androidx.media3.common.Player;
 import androidx.media3.exoplayer.ExoPlayer;
+import androidx.media3.exoplayer.source.DefaultMediaSourceFactory;
+import androidx.media3.datasource.DefaultHttpDataSource;
 import androidx.media3.ui.PlayerControlView;
 import androidx.media3.ui.PlayerView;
 
@@ -53,7 +55,7 @@ public class MainActivity extends AppCompatActivity {
         {"NTV News HD","https://nepaltv.nettvnepal.com.np/notoken/hd-NtvNews-1500.stream/chunks.m3u8"},
         {"NTV Kohalpur HD","https://nepaltv.nettvnepal.com.np/notoken/netNTVKOHALPUR1500.stream/chunks.m3u8"},
         {"NTV Itahari HD","https://nepaltv.nettvnepal.com.np/notoken/ntvithari.stream/chunks.m3u8"},
-        {"Kantipur TV HD","https://ktvhdnpicc66.ekantipur.com/ktv_abr/hd/playlist.m3u8"},
+        {"Kantipur TV HD","https://ktvhdsg.ekantipur.com:8443/ktv_desktop_02347834/hd/playlist.m3u8"},
         {"Kantipur TV 720p","https://ktvhdnpicc6670.ekantipur.com/ktv_abr/hd/kantipurtv/hd_720/chunks.m3u8"},
         {"News24 Nepal","http://maxotts.maxdigitaltv.com/x-media/C9/master.m3u8"},
         {"Public 4K TV","http://103.180.240.141:8080/hls/main1/playlist.m3u8"}
@@ -196,7 +198,24 @@ public class MainActivity extends AppCompatActivity {
 
         releasePlayer();
 
-        player = new ExoPlayer.Builder(this).build();
+        DefaultHttpDataSource.Factory httpFactory =
+                new DefaultHttpDataSource.Factory()
+                        .setUserAgent(
+                                "Mozilla/5.0 (Android) Samaj Sandesh/1.6"
+                        )
+                        .setAllowCrossProtocolRedirects(true)
+                        .setDefaultRequestProperties(
+                                java.util.Collections.singletonMap(
+                                        "Accept",
+                                        "*/*"
+                                )
+                        );
+
+        player = new ExoPlayer.Builder(this)
+                .setMediaSourceFactory(
+                        new DefaultMediaSourceFactory(httpFactory)
+                )
+                .build();
 
         if (tvMode) {
             videoPlayer.setPlayer(player);
@@ -211,8 +230,12 @@ public class MainActivity extends AppCompatActivity {
                     PlaybackException error) {
 
                 status.setText(
-                        "❌ यो stream अहिले चल्न सकेन। "
-                                + "अर्को channel छान्नुहोस्।"
+                        "❌ Stream error: "
+                                + error.errorCodeName
+                                + " | "
+                                + (error.getMessage() == null
+                                ? ""
+                                : error.getMessage())
                 );
             }
 
@@ -236,11 +259,6 @@ public class MainActivity extends AppCompatActivity {
         });
 
         try {
-
-            /*
-             * TV = HLS (.m3u8)
-             * Radio = normal audio stream
-             */
 
             MediaItem mediaItem;
 
