@@ -2,149 +2,212 @@
 
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#F5F7FA">
+    android:background="#101010">
 
-    <!-- Header -->
+    <!-- ===================================================== -->
+    <!-- HEADER -->
+    <!-- ===================================================== -->
+
     <LinearLayout
+        android:id="@+id/header"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="16dp"
-        android:background="#0F766E">
+        android:layout_height="56dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:background="#151515">
 
         <TextView
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:text="समाज सन्देश"
             android:textColor="#FFFFFF"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            android:gravity="center"/>
+            android:textSize="20sp"
+            android:textStyle="bold" />
 
         <TextView
-            android:layout_width="match_parent"
+            android:id="@+id/status"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Radio • Live TV"
-            android:textColor="#E6FFFA"
-            android:textSize="14sp"
-            android:gravity="center"
-            android:layout_marginTop="4dp"/>
+            android:text="Ready"
+            android:textColor="#BBBBBB"
+            android:textSize="12sp" />
 
     </LinearLayout>
 
-    <!-- Radio / TV Buttons -->
+
+    <!-- ===================================================== -->
+    <!-- RADIO / TV BUTTONS -->
+    <!-- ===================================================== -->
+
     <LinearLayout
+        android:id="@+id/modeButtons"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="52dp"
         android:orientation="horizontal"
-        android:padding="10dp"
-        android:gravity="center">
+        android:gravity="center"
+        android:padding="6dp"
+        android:background="#1B1B1B">
 
         <Button
             android:id="@+id/radioButton"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_weight="1"
-            android:text="📻 Radio"
-            android:textSize="15sp"
-            android:onClick="openRadio"/>
+            android:text="📻 RADIO"
+            android:textSize="14sp"
+            android:onClick="openRadio" />
 
         <Space
             android:layout_width="8dp"
-            android:layout_height="1dp"/>
+            android:layout_height="match_parent" />
 
         <Button
             android:id="@+id/tvButton"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_weight="1"
-            android:text="📺 Live TV"
-            android:textSize="15sp"
-            android:onClick="openTv"/>
+            android:text="📺 TV"
+            android:textSize="14sp"
+            android:onClick="openTv" />
 
     </LinearLayout>
 
-    <!-- Search -->
+
+    <!-- ===================================================== -->
+    <!-- SEARCH -->
+    <!-- ===================================================== -->
+
     <EditText
         android:id="@+id/searchBox"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="12dp"
-        android:layout_marginEnd="12dp"
-        android:layout_marginBottom="8dp"
-        android:hint="🔍 Search Radio / TV..."
+        android:layout_height="48dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginTop="6dp"
+        android:layout_marginBottom="6dp"
+        android:hint="🔍 Search radio / TV channel"
+        android:textColor="#FFFFFF"
+        android:textColorHint="#888888"
+        android:textSize="14sp"
         android:singleLine="true"
-        android:padding="12dp"
-        android:background="@android:drawable/edit_text"/>
+        android:paddingStart="14dp"
+        android:paddingEnd="14dp"
+        android:background="#242424" />
 
-    <!-- Now Playing -->
+
+    <!-- ===================================================== -->
+    <!-- NOW PLAYING -->
+    <!-- ===================================================== -->
+
     <TextView
         android:id="@+id/nowPlaying"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="40dp"
+        android:gravity="center_vertical"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
         android:text="Nothing playing"
-        android:textSize="17sp"
-        android:textStyle="bold"
-        android:textColor="#111827"
-        android:gravity="center"
-        android:padding="10dp"/>
+        android:textColor="#FFFFFF"
+        android:textSize="14sp"
+        android:background="#181818" />
 
-    <!-- Status -->
-    <TextView
-        android:id="@+id/status"
+
+    <!-- ===================================================== -->
+    <!-- TV PLAYER AREA -->
+    <!-- ===================================================== -->
+
+    <FrameLayout
+        android:id="@+id/tvPlayerContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Ready"
-        android:textSize="14sp"
-        android:textColor="#374151"
-        android:gravity="center"
-        android:padding="6dp"/>
+        android:background="#000000"
+        android:visibility="gone">
 
-    <!-- TV ExoPlayer -->
-    <androidx.media3.ui.PlayerView
-        android:id="@+id/tvPlayerView"
-        android:layout_width="match_parent"
-        android:layout_height="220dp"
-        android:visibility="gone"
-        android:background="#000000"/>
+        <!-- ================================================= -->
+        <!-- VIDEO PLAYER -->
+        <!-- ================================================= -->
 
-    <!-- Official TV WebView -->
-    <WebView
-        android:id="@+id/tvWebView"
-        android:layout_width="match_parent"
-        android:layout_height="300dp"
-        android:visibility="gone"
-        android:background="#000000"/>
+        <androidx.media3.ui.PlayerView
+            android:id="@+id/tvPlayerView"
+            android:layout_width="match_parent"
+            android:layout_height="230dp"
+            android:background="#000000"
+            app:resize_mode="fit"
+            app:show_buffering="when_playing"
+            app:show_shuffle_button="false"
+            app:show_subtitle_button="false"
+            app:show_next_button="false"
+            app:show_previous_button="false" />
 
-    <!-- Radio Controls -->
+
+        <!-- ================================================= -->
+        <!-- ROTATE BUTTON -->
+        <!-- ================================================= -->
+
+        <Button
+            android:id="@+id/rotateButton"
+            android:layout_width="52dp"
+            android:layout_height="52dp"
+            android:layout_gravity="top|end"
+            android:layout_margin="8dp"
+            android:text="↻"
+            android:textColor="#FFFFFF"
+            android:textSize="22sp"
+            android:background="#88000000"
+            android:elevation="6dp" />
+
+    </FrameLayout>
+
+
+    <!-- ===================================================== -->
+    <!-- RADIO CONTROL -->
+    <!-- ===================================================== -->
+
     <androidx.media3.ui.PlayerControlView
         android:id="@+id/radioControls"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="#181818"
         android:visibility="gone"
-        android:padding="8dp"/>
+        app:show_timeout="3000"
+        app:show_rewind_button="true"
+        app:show_fastforward_button="true" />
 
-    <!-- Stop -->
-    <Button
-        android:id="@+id/stopButton"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="12dp"
-        android:layout_marginEnd="12dp"
-        android:layout_marginTop="6dp"
-        android:text="⏹ Stop"
-        android:textSize="15sp"/>
 
-    <!-- Station / Channel List -->
+    <!-- ===================================================== -->
+    <!-- LIST -->
+    <!-- ===================================================== -->
+
     <ListView
         android:id="@+id/listView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
+        android:divider="#333333"
         android:dividerHeight="1dp"
-        android:padding="6dp"/>
+        android:background="#101010"
+        android:paddingTop="4dp"
+        android:paddingBottom="4dp" />
+
+
+    <!-- ===================================================== -->
+    <!-- STOP BUTTON -->
+    <!-- ===================================================== -->
+
+    <Button
+        android:id="@+id/stopButton"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_margin="8dp"
+        android:text="⏹ STOP"
+        android:textSize="15sp"
+        android:textStyle="bold" />
 
 </LinearLayout>
