@@ -1,102 +1,150 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
-    android:padding="12dp"
-    android:background="#F4F7F8"
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#F5F7FA">
 
-    <TextView
-        android:text="समाज सन्देश"
-        android:textSize="27sp"
-        android:textStyle="bold"
-        android:gravity="center"
-        android:textColor="#0F766E"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
-
+    <!-- Header -->
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <Button
-            android:id="@+id/radioTab"
-            android:text="📻 Radio"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"/>
-
-        <Button
-            android:id="@+id/tvTab"
-            android:text="📺 Live TV"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"/>
-    </LinearLayout>
-
-    <EditText
-        android:id="@+id/search"
-        android:hint="Radio / TV खोज्नुहोस्..."
-        android:singleLine="true"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
-
-    <Spinner
-        android:id="@+id/list"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
-
-    <TextView
-        android:id="@+id/nowPlaying"
-        android:text="📻 Radio Player"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        android:gravity="center"
-        android:padding="18dp"
-        android:textColor="#0F766E"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
-
-    <androidx.media3.ui.PlayerControlView
-        android:id="@+id/audioControls"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:show_timeout="0"/>
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:background="#0F766E">
 
-    <androidx.media3.ui.PlayerView
-        android:id="@+id/playerView"
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="समाज सन्देश"
+            android:textColor="#FFFFFF"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:gravity="center"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Radio • Live TV"
+            android:textColor="#E6FFFA"
+            android:textSize="14sp"
+            android:gravity="center"
+            android:layout_marginTop="4dp"/>
+
+    </LinearLayout>
+
+    <!-- Radio / TV Buttons -->
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="240dp"
-        android:visibility="gone"
-        app:show_buffering="when_playing"
-        app:use_controller="true"/>
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="10dp"
+        android:gravity="center">
 
+        <Button
+            android:id="@+id/radioButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="📻 Radio"
+            android:textSize="15sp"
+            android:onClick="openRadio"/>
+
+        <Space
+            android:layout_width="8dp"
+            android:layout_height="1dp"/>
+
+        <Button
+            android:id="@+id/tvButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="📺 Live TV"
+            android:textSize="15sp"
+            android:onClick="openTv"/>
+
+    </LinearLayout>
+
+    <!-- Search -->
+    <EditText
+        android:id="@+id/searchBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:layout_marginEnd="12dp"
+        android:layout_marginBottom="8dp"
+        android:hint="🔍 Search Radio / TV..."
+        android:singleLine="true"
+        android:padding="12dp"
+        android:background="@android:drawable/edit_text"/>
+
+    <!-- Now Playing -->
+    <TextView
+        android:id="@+id/nowPlaying"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Nothing playing"
+        android:textSize="17sp"
+        android:textStyle="bold"
+        android:textColor="#111827"
+        android:gravity="center"
+        android:padding="10dp"/>
+
+    <!-- Status -->
     <TextView
         android:id="@+id/status"
-        android:text="Radio छान्नुहोस्"
-        android:gravity="center"
-        android:padding="12dp"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
-
-    <LinearLayout
+        android:layout_height="wrap_content"
+        android:text="Ready"
+        android:textSize="14sp"
+        android:textColor="#374151"
         android:gravity="center"
+        android:padding="6dp"/>
+
+    <!-- TV ExoPlayer -->
+    <androidx.media3.ui.PlayerView
+        android:id="@+id/tvPlayerView"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="220dp"
+        android:visibility="gone"
+        android:background="#000000"/>
 
-        <Button
-            android:id="@+id/play"
-            android:text="▶ Play"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"/>
+    <!-- Official TV WebView -->
+    <WebView
+        android:id="@+id/tvWebView"
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        android:visibility="gone"
+        android:background="#000000"/>
 
-        <Button
-            android:id="@+id/stop"
-            android:text="■ Stop"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"/>
-    </LinearLayout>
+    <!-- Radio Controls -->
+    <androidx.media3.ui.PlayerControlView
+        android:id="@+id/radioControls"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        android:padding="8dp"/>
+
+    <!-- Stop -->
+    <Button
+        android:id="@+id/stopButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:layout_marginEnd="12dp"
+        android:layout_marginTop="6dp"
+        android:text="⏹ Stop"
+        android:textSize="15sp"/>
+
+    <!-- Station / Channel List -->
+    <ListView
+        android:id="@+id/listView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:dividerHeight="1dp"
+        android:padding="6dp"/>
 
 </LinearLayout>
