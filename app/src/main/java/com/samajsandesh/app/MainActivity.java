@@ -198,10 +198,10 @@ public class MainActivity extends AppCompatActivity {
                 findViewById(R.id.stopButton);
 
         rotateButton =
-                findViewById(R.id.rotateButton);
+                findViewById(R.id.rotateScreenButton);
 
         tvPlayerContainer =
-                findViewById(R.id.tvPlayerContainer);
+                findViewById(R.id.tvPlayerFrame);
 
 
         // ========================================================
@@ -928,12 +928,12 @@ public class MainActivity extends AppCompatActivity {
 
 
         findViewById(
-                R.id.header
+                R.id.headerLayout
         ).setVisibility(v);
 
 
         findViewById(
-                R.id.modeButtons
+                R.id.modeButtonsLayout
         ).setVisibility(v);
 
 
