@@ -1,17 +1,15 @@
 package com.samajsandesh.app;
 
-import android.annotation.SuppressLint;
-import android.graphics.Color;
+import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
-import android.webkit.WebChromeClient;
-import android.webkit.WebSettings;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
+import android.view.WindowManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -22,7 +20,9 @@ import androidx.media3.common.PlaybackException;
 import androidx.media3.common.Player;
 import androidx.media3.common.util.UnstableApi;
 import androidx.media3.exoplayer.ExoPlayer;
+import androidx.media3.exoplayer.hls.HlsMediaSource;
 import androidx.media3.datasource.DefaultHttpDataSource;
+import androidx.media3.ui.AspectRatioFrameLayout;
 import androidx.media3.ui.PlayerControlView;
 import androidx.media3.ui.PlayerView;
 
@@ -32,10 +32,6 @@ import java.util.Collections;
 @UnstableApi
 public class MainActivity extends AppCompatActivity {
 
-    // =========================
-    // UI
-    // =========================
-
     private ListView listView;
     private EditText searchBox;
     private TextView nowPlaying;
@@ -44,167 +40,245 @@ public class MainActivity extends AppCompatActivity {
     private PlayerView tvPlayerView;
     private PlayerControlView radioControls;
 
-    private WebView tvWebView;
-
     private Button stopButton;
+    private Button rotateButton;
 
-    // =========================
-    // Player
-    // =========================
+    private FrameLayout tvPlayerContainer;
 
     private ExoPlayer player;
 
     private boolean tvMode = false;
 
-    // =========================
-    // Radio List
-    // =========================
+
+    // ============================================================
+    // RADIO CHANNELS
+    // ============================================================
 
     private final String[][] RADIO = {
 
-            {"Kantipur FM 96.1",
-                    "https://radio-broadcast.ekantipur.com/stream"},
+            {
+                    "Kantipur FM 96.1",
+                    "https://radio-broadcast.ekantipur.com/stream"
+            },
 
-            {"Kalika FM 95.2",
-                    "https://streaming.softnep.net:10828/stream"},
+            {
+                    "Kalika FM 95.2",
+                    "https://streaming.softnep.net:10828/stream"
+            },
 
-            {"BBC Nepali",
-                    "https://stream.live.vc.bbcmedia.co.uk/bbc_nepali_radio"},
+            {
+                    "BBC Nepali",
+                    "https://stream.live.vc.bbcmedia.co.uk/bbc_nepali_radio"
+            },
 
-            {"CIN Khabar",
-                    "https://streaming.softnep.net:10996/;stream.mp3"},
+            {
+                    "CIN Khabar",
+                    "https://streaming.softnep.net:10996/;stream.mp3"
+            },
 
-            {"Ujyaalo 90 Network",
-                    "http://stream.zenolive.com/wtuvp08xq1duv"},
+            {
+                    "Ujyaalo 90 Network",
+                    "http://stream.zenolive.com/wtuvp08xq1duv"
+            },
 
-            {"Jayaprithvi FM",
-                    "https://streaming.softnep.net:10824/"},
+            {
+                    "Jayaprithvi FM",
+                    "https://streaming.softnep.net:10824/"
+            },
 
-            {"Butwal FM",
-                    "https://streaming.softnep.net:10994/;stream.nsv"},
+            {
+                    "Butwal FM",
+                    "https://streaming.softnep.net:10994/;stream.nsv"
+            },
 
-            {"Image FM",
-                    "https://www.hamropatro.com/api/radio/stream/9"},
+            {
+                    "Image FM",
+                    "https://www.hamropatro.com/api/radio/stream/9"
+            },
 
-            {"Chitwan Radio Network",
-                    "https://www.hamropatro.com/api/radio/stream/123"},
+            {
+                    "Chitwan Radio Network",
+                    "https://www.hamropatro.com/api/radio/stream/123"
+            },
 
-            {"Makalu FM",
-                    "https://www.hamropatro.com/api/radio/stream/318"},
+            {
+                    "Makalu FM",
+                    "https://www.hamropatro.com/api/radio/stream/318"
+            },
 
-            {"Nepali Radio Network",
-                    "https://www.hamropatro.com/api/radio/stream/560"}
+            {
+                    "Nepali Radio Network",
+                    "https://www.hamropatro.com/api/radio/stream/560"
+            }
     };
 
-    // =========================
-    // Official TV Pages
-    // =========================
+
+    // ============================================================
+    // DIRECT TV HLS STREAMS
+    // ============================================================
 
     private final String[][] TV = {
 
             {
-                    "Nepal Television – Official Live",
-                    "https://nepaltvonline.com/live"
+                    "Nepal Television HD",
+                    "https://nepaltv.nettvnepal.com.np/notoken/NTVNEPAL1500.stream/chunks.m3u8"
             },
 
             {
-                    "Kantipur TV – Official Live",
-                    "https://kantipurtv.com/live"
+                    "NTV Plus HD",
+                    "https://nepaltv.nettvnepal.com.np/notoken/hd-NtvPlus-1500.stream/chunks.m3u8"
             },
 
             {
-                    "NetTV – Live TV",
-                    "https://webtv.nettv.com.np/livetv"
+                    "NTV News HD",
+                    "https://nepaltv.nettvnepal.com.np/notoken/hd-NtvNews-1500.stream/chunks.m3u8"
+            },
+
+            {
+                    "Kantipur TV HD",
+                    "https://ktvhdnpicc66.ekantipur.com/ktv_abr/hd/playlist.m3u8"
+            },
+
+            {
+                    "Kantipur TV HD – Backup",
+                    "https://ktvhdsg.ekantipur.com:8443/high_quality_85840165/hd/playlist.m3u8"
             }
     };
 
-    // =========================
-    // Current List
-    // =========================
 
-    private final ArrayList<String> displayNames = new ArrayList<>();
-    private final ArrayList<String> displayUrls = new ArrayList<>();
+    // ============================================================
+    // DISPLAY LIST
+    // ============================================================
+
+    private final ArrayList<String> displayNames =
+            new ArrayList<>();
+
+    private final ArrayList<String> displayUrls =
+            new ArrayList<>();
 
     private ArrayAdapter<String> adapter;
 
-    // =========================
-    // onCreate
-    // =========================
 
-    @SuppressLint("SetJavaScriptEnabled")
+    // ============================================================
+    // ON CREATE
+    // ============================================================
+
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
+    protected void onCreate(
+            @Nullable Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
 
-        // =========================
-        // Find Views
-        // =========================
-        // Runtime resource lookup प्रयोग गरिएको छ।
-        // यसले R.id compile-symbol error बाट बचाउँछ।
 
-        listView = findViewById(viewId("listView"));
-        searchBox = findViewById(viewId("searchBox"));
-        nowPlaying = findViewById(viewId("nowPlaying"));
-        status = findViewById(viewId("status"));
+        // ========================================================
+        // FIND VIEWS
+        // ========================================================
 
-        tvPlayerView = findViewById(viewId("tvPlayerView"));
-        radioControls = findViewById(viewId("radioControls"));
+        listView =
+                findViewById(R.id.listView);
 
-        tvWebView = findViewById(viewId("tvWebView"));
+        searchBox =
+                findViewById(R.id.searchBox);
 
-        stopButton = findViewById(viewId("stopButton"));
+        nowPlaying =
+                findViewById(R.id.nowPlaying);
 
-        // =========================
-        // Initial UI
-        // =========================
+        status =
+                findViewById(R.id.status);
 
-        tvPlayerView.setVisibility(View.GONE);
-        radioControls.setVisibility(View.GONE);
-        tvWebView.setVisibility(View.GONE);
+        tvPlayerView =
+                findViewById(R.id.tvPlayerView);
 
-        // =========================
-        // Setup WebView
-        // =========================
+        radioControls =
+                findViewById(R.id.radioControls);
 
-        setupTvWebView();
+        stopButton =
+                findViewById(R.id.stopButton);
 
-        // =========================
-        // Setup List
-        // =========================
+        rotateButton =
+                findViewById(R.id.rotateButton);
 
-        adapter = new ArrayAdapter<>(
-                this,
-                android.R.layout.simple_list_item_1,
-                displayNames
+        tvPlayerContainer =
+                findViewById(R.id.tvPlayerContainer);
+
+
+        // ========================================================
+        // TV PLAYER SETTINGS
+        // ========================================================
+
+        tvPlayerView.setResizeMode(
+                AspectRatioFrameLayout.RESIZE_MODE_FIT
         );
+
+        tvPlayerView.setUseController(true);
+
+        tvPlayerView.setShowBuffering(
+                PlayerView.SHOW_BUFFERING_WHEN_PLAYING
+        );
+
+        tvPlayerView.setControllerShowTimeoutMs(
+                3500
+        );
+
+        tvPlayerView.setVisibility(
+                View.GONE
+        );
+
+
+        // ========================================================
+        // RADIO CONTROL
+        // ========================================================
+
+        radioControls.setVisibility(
+                View.GONE
+        );
+
+
+        // ========================================================
+        // ADAPTER
+        // ========================================================
+
+        adapter =
+                new ArrayAdapter<>(
+                        this,
+                        android.R.layout.simple_list_item_1,
+                        displayNames
+                );
 
         listView.setAdapter(adapter);
 
-        // Default Radio list
+
+        // ========================================================
+        // DEFAULT RADIO
+        // ========================================================
+
         showRadioList();
 
-        // =========================
-        // Item Click
-        // =========================
 
-        listView.setOnItemClickListener((parent, view, position, id) -> {
+        // ========================================================
+        // LIST ITEM CLICK
+        // ========================================================
 
-            if (position < 0 || position >= displayUrls.size()) {
-                return;
-            }
+        listView.setOnItemClickListener(
+                (parent, view, position, id) -> {
 
-            String name = displayNames.get(position);
-            String url = displayUrls.get(position);
+                    if (position >= 0 &&
+                            position < displayUrls.size()) {
 
-            playSelected(name, url);
-        });
+                        playSelected(
+                                displayNames.get(position),
+                                displayUrls.get(position)
+                        );
+                    }
+                }
+        );
 
-        // =========================
-        // Search
-        // =========================
+
+        // ========================================================
+        // SEARCH
+        // ========================================================
 
         searchBox.addTextChangedListener(
                 new android.text.TextWatcher() {
@@ -224,7 +298,9 @@ public class MainActivity extends AppCompatActivity {
                             int before,
                             int count) {
 
-                        filterList(s.toString());
+                        filterList(
+                                s.toString()
+                        );
                     }
 
                     @Override
@@ -234,71 +310,30 @@ public class MainActivity extends AppCompatActivity {
                 }
         );
 
-        // =========================
-        // Stop Button
-        // =========================
 
-        stopButton.setOnClickListener(v -> stopPlayback());
+        // ========================================================
+        // STOP BUTTON
+        // ========================================================
 
-        status.setText("Ready");
-    }
-
-    // ============================================================
-    // RESOURCE ID FIX
-    // ============================================================
-
-    private int viewId(String name) {
-
-        int id = getResources().getIdentifier(
-                name,
-                "id",
-                getPackageName()
+        stopButton.setOnClickListener(
+                v -> stopPlayback()
         );
 
-        if (id == 0) {
 
-            throw new IllegalStateException(
-                    "Missing view ID in activity_main.xml: " + name
-            );
-        }
+        // ========================================================
+        // ROTATE BUTTON
+        // ========================================================
 
-        return id;
+        rotateButton.setOnClickListener(
+                v -> toggleOrientation()
+        );
+
+
+        status.setText(
+                "Ready"
+        );
     }
 
-    // ============================================================
-    // WEBVIEW
-    // ============================================================
-
-    @SuppressLint("SetJavaScriptEnabled")
-    private void setupTvWebView() {
-
-        if (tvWebView == null) {
-            return;
-        }
-
-        WebSettings settings = tvWebView.getSettings();
-
-        settings.setJavaScriptEnabled(true);
-        settings.setDomStorageEnabled(true);
-
-        settings.setMediaPlaybackRequiresUserGesture(false);
-
-        settings.setLoadWithOverviewMode(true);
-        settings.setUseWideViewPort(true);
-
-        settings.setBuiltInZoomControls(false);
-        settings.setDisplayZoomControls(false);
-
-        settings.setSupportZoom(false);
-
-        tvWebView.setBackgroundColor(Color.BLACK);
-
-        tvWebView.setWebViewClient(new WebViewClient());
-
-        tvWebView.setWebChromeClient(new WebChromeClient());
-
-        tvWebView.setOverScrollMode(View.OVER_SCROLL_NEVER);
-    }
 
     // ============================================================
     // SHOW RADIO LIST
@@ -310,25 +345,37 @@ public class MainActivity extends AppCompatActivity {
 
         stopCurrentPlayer();
 
-        tvPlayerView.setVisibility(View.GONE);
+        tvPlayerContainer.setVisibility(
+                View.GONE
+        );
 
-        tvWebView.setVisibility(View.GONE);
-
-        radioControls.setVisibility(View.VISIBLE);
+        radioControls.setVisibility(
+                View.VISIBLE
+        );
 
         displayNames.clear();
         displayUrls.clear();
 
-        for (String[] radio : RADIO) {
 
-            displayNames.add("📻 " + radio[0]);
-            displayUrls.add(radio[1]);
+        for (String[] r : RADIO) {
+
+            displayNames.add(
+                    "📻 " + r[0]
+            );
+
+            displayUrls.add(
+                    r[1]
+            );
         }
+
 
         adapter.notifyDataSetChanged();
 
-        status.setText("📻 Select a radio station");
+        status.setText(
+                "📻 Select a radio station"
+        );
     }
+
 
     // ============================================================
     // SHOW TV LIST
@@ -340,129 +387,244 @@ public class MainActivity extends AppCompatActivity {
 
         stopCurrentPlayer();
 
-        tvPlayerView.setVisibility(View.GONE);
+        tvPlayerContainer.setVisibility(
+                View.GONE
+        );
 
-        radioControls.setVisibility(View.GONE);
-
-        tvWebView.setVisibility(View.GONE);
+        radioControls.setVisibility(
+                View.GONE
+        );
 
         displayNames.clear();
         displayUrls.clear();
 
-        for (String[] tv : TV) {
 
-            displayNames.add("📺 " + tv[0]);
-            displayUrls.add(tv[1]);
+        for (String[] t : TV) {
+
+            displayNames.add(
+                    "📺 " + t[0]
+            );
+
+            displayUrls.add(
+                    t[1]
+            );
         }
+
 
         adapter.notifyDataSetChanged();
 
-        status.setText("📺 Select a TV channel");
+        status.setText(
+                "📺 Select a TV channel"
+        );
     }
+
 
     // ============================================================
     // PLAY SELECTED
     // ============================================================
 
-    private void playSelected(String name, String url) {
+    private void playSelected(
+            String name,
+            String url) {
 
         if (tvMode) {
 
-            openOfficialTv(name, url);
+            playTv(
+                    name,
+                    url
+            );
 
         } else {
 
-            playRadio(name, url);
-        }
-    }
-
-    // ============================================================
-    // OFFICIAL TV IN APP
-    // ============================================================
-
-    private void openOfficialTv(String name, String url) {
-
-        stopCurrentPlayer();
-
-        tvPlayerView.setVisibility(View.GONE);
-
-        radioControls.setVisibility(View.GONE);
-
-        tvWebView.setVisibility(View.VISIBLE);
-
-        nowPlaying.setText(name);
-
-        status.setText("⏳ Loading official live TV...");
-
-        tvWebView.loadUrl(url);
-    }
-
-    // ============================================================
-    // RADIO PLAYER
-    // ============================================================
-
-    private void playRadio(String name, String url) {
-
-        tvMode = false;
-
-        tvWebView.setVisibility(View.GONE);
-
-        tvPlayerView.setVisibility(View.GONE);
-
-        radioControls.setVisibility(View.VISIBLE);
-
-        nowPlaying.setText(name);
-
-        status.setText("⏳ Loading...");
-
-        stopCurrentPlayer();
-
-        try {
-
-            DefaultHttpDataSource.Factory httpFactory =
-                    new DefaultHttpDataSource.Factory()
-                            .setUserAgent(
-                                    "Mozilla/5.0 (Android) Samaj Sandesh/1.7"
-                            )
-                            .setAllowCrossProtocolRedirects(true)
-                            .setDefaultRequestProperties(
-                                    Collections.singletonMap(
-                                            "Accept",
-                                            "*/*"
-                                    )
-                            );
-
-            player = new ExoPlayer.Builder(this)
-                    .setMediaSourceFactory(
-                            new androidx.media3.exoplayer.source.DefaultMediaSourceFactory(
-                                    httpFactory
-                            )
-                    )
-                    .build();
-
-            radioControls.setPlayer(player);
-
-            MediaItem mediaItem =
-                    new MediaItem.Builder()
-                            .setUri(Uri.parse(url))
-                            .build();
-
-            player.setMediaItem(mediaItem);
-
-            addPlayerListener();
-
-            player.prepare();
-
-            player.play();
-
-        } catch (Exception e) {
-
-            status.setText(
-                    "❌ Radio error:\n" +
-                            e.getMessage()
+            playRadio(
+                    name,
+                    url
             );
         }
     }
+
+
+    // ============================================================
+    // PLAY TV
+    // ============================================================
+
+    private void playTv(
+            String name,
+            String url) {
+
+        tvMode = true;
+
+        stopCurrentPlayer();
+
+
+        radioControls.setVisibility(
+                View.GONE
+        );
+
+        tvPlayerContainer.setVisibility(
+                View.VISIBLE
+        );
+
+
+        nowPlaying.setText(
+                name
+        );
+
+        status.setText(
+                "⏳ Connecting to live video..."
+        );
+
+
+        // ========================================================
+        // HTTP DATA SOURCE
+        // ========================================================
+
+        DefaultHttpDataSource.Factory httpFactory =
+                new DefaultHttpDataSource.Factory()
+                        .setUserAgent(
+                                "Mozilla/5.0 (Android) Samaj Sandesh/1.8"
+                        )
+                        .setAllowCrossProtocolRedirects(
+                                true
+                        )
+                        .setDefaultRequestProperties(
+                                Collections.singletonMap(
+                                        "Accept",
+                                        "*/*"
+                                )
+                        );
+
+
+        // ========================================================
+        // EXOPLAYER
+        // ========================================================
+
+        player =
+                new ExoPlayer.Builder(this)
+                        .build();
+
+
+        tvPlayerView.setPlayer(
+                player
+        );
+
+
+        // ========================================================
+        // MEDIA ITEM
+        // ========================================================
+
+        MediaItem item =
+                MediaItem.fromUri(
+                        Uri.parse(url)
+                );
+
+
+        // ========================================================
+        // HLS SOURCE
+        // ========================================================
+
+        HlsMediaSource source =
+                new HlsMediaSource.Factory(
+                        httpFactory
+                ).createMediaSource(
+                        item
+                );
+
+
+        player.setMediaSource(
+                source
+        );
+
+
+        // ========================================================
+        // LISTENER
+        // ========================================================
+
+        addPlayerListener();
+
+
+        // ========================================================
+        // START
+        // ========================================================
+
+        player.prepare();
+
+        player.play();
+    }
+
+
+    // ============================================================
+    // PLAY RADIO
+    // ============================================================
+
+    private void playRadio(
+            String name,
+            String url) {
+
+        tvMode = false;
+
+        stopCurrentPlayer();
+
+
+        tvPlayerContainer.setVisibility(
+                View.GONE
+        );
+
+        radioControls.setVisibility(
+                View.VISIBLE
+        );
+
+
+        nowPlaying.setText(
+                name
+        );
+
+        status.setText(
+                "⏳ Loading..."
+        );
+
+
+        DefaultHttpDataSource.Factory httpFactory =
+                new DefaultHttpDataSource.Factory()
+                        .setUserAgent(
+                                "Mozilla/5.0 (Android) Samaj Sandesh/1.8"
+                        )
+                        .setAllowCrossProtocolRedirects(
+                                true
+                        )
+                        .setDefaultRequestProperties(
+                                Collections.singletonMap(
+                                        "Accept",
+                                        "*/*"
+                                )
+                        );
+
+
+        player =
+                new ExoPlayer.Builder(this)
+                        .build();
+
+
+        radioControls.setPlayer(
+                player
+        );
+
+
+        player.setMediaItem(
+                MediaItem.fromUri(
+                        Uri.parse(url)
+                )
+        );
+
+
+        addPlayerListener();
+
+
+        player.prepare();
+
+        player.play();
+    }
+
 
     // ============================================================
     // PLAYER LISTENER
@@ -474,84 +636,99 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        player.addListener(new Player.Listener() {
 
-            @Override
-            public void onPlaybackStateChanged(int state) {
+        player.addListener(
+                new Player.Listener() {
 
-                if (state == Player.STATE_BUFFERING) {
+                    @Override
+                    public void onPlaybackStateChanged(
+                            int state) {
 
-                    status.setText("⏳ Loading...");
+                        if (state ==
+                                Player.STATE_BUFFERING) {
 
-                } else if (state == Player.STATE_READY) {
+                            status.setText(
+                                    "⏳ Buffering..."
+                            );
 
-                    status.setText("▶️ Playing");
+                        } else if (state ==
+                                Player.STATE_READY) {
 
-                } else if (state == Player.STATE_ENDED) {
+                            status.setText(
+                                    "▶️ LIVE"
+                            );
 
-                    status.setText("⏹ Playback ended");
-                }
-            }
+                        } else if (state ==
+                                Player.STATE_ENDED) {
 
-            @Override
-            public void onPlayerError(
-                    PlaybackException error) {
+                            status.setText(
+                                    "⏹ Playback ended"
+                            );
+                        }
+                    }
 
-                String errorName =
-                        PlaybackException.getErrorCodeName(
-                                error.errorCode
+
+                    @Override
+                    public void onPlayerError(
+                            PlaybackException error) {
+
+                        status.setText(
+                                "❌ Stream unavailable. Try another channel."
                         );
-
-                String message = error.getMessage();
-
-                if (message == null) {
-                    message = "";
+                    }
                 }
-
-                status.setText(
-                        "❌ Stream error: " +
-                                errorName +
-                                "\n" +
-                                message
-                );
-            }
-        });
+        );
     }
 
+
     // ============================================================
-    // STOP
+    // STOP PLAYBACK
     // ============================================================
 
     private void stopPlayback() {
 
         stopCurrentPlayer();
 
-        if (tvWebView != null) {
+        tvPlayerContainer.setVisibility(
+                View.GONE
+        );
 
-            tvWebView.stopLoading();
+        radioControls.setVisibility(
+                View.GONE
+        );
 
-            tvWebView.setVisibility(View.GONE);
-        }
 
-        tvPlayerView.setVisibility(View.GONE);
+        nowPlaying.setText(
+                "Nothing playing"
+        );
 
-        radioControls.setVisibility(View.GONE);
-
-        nowPlaying.setText("Nothing playing");
-
-        status.setText("⏹ Stopped");
+        status.setText(
+                "⏹ Stopped"
+        );
     }
 
+
     // ============================================================
-    // STOP PLAYER
+    // STOP CURRENT PLAYER
     // ============================================================
 
     private void stopCurrentPlayer() {
 
         if (radioControls != null) {
 
-            radioControls.setPlayer(null);
+            radioControls.setPlayer(
+                    null
+            );
         }
+
+
+        if (tvPlayerView != null) {
+
+            tvPlayerView.setPlayer(
+                    null
+            );
+        }
+
 
         if (player != null) {
 
@@ -564,60 +741,256 @@ public class MainActivity extends AppCompatActivity {
             } catch (Exception ignored) {
             }
 
+
             player = null;
         }
     }
 
+
     // ============================================================
-    // FILTER
+    // SEARCH FILTER
     // ============================================================
 
-    private void filterList(String query) {
+    private void filterList(
+            String query) {
 
-        String q = query.toLowerCase().trim();
+        String q =
+                query.toLowerCase().trim();
+
 
         displayNames.clear();
+
         displayUrls.clear();
 
-        if (tvMode) {
 
-            for (String[] tv : TV) {
+        String[][] source =
+                tvMode ? TV : RADIO;
 
-                if (tv[0].toLowerCase().contains(q)) {
 
-                    displayNames.add("📺 " + tv[0]);
-                    displayUrls.add(tv[1]);
-                }
-            }
+        for (String[] item : source) {
 
-        } else {
+            if (item[0]
+                    .toLowerCase()
+                    .contains(q)) {
 
-            for (String[] radio : RADIO) {
+                displayNames.add(
+                        (tvMode
+                                ? "📺 "
+                                : "📻 ")
+                                + item[0]
+                );
 
-                if (radio[0].toLowerCase().contains(q)) {
-
-                    displayNames.add("📻 " + radio[0]);
-                    displayUrls.add(radio[1]);
-                }
+                displayUrls.add(
+                        item[1]
+                );
             }
         }
+
 
         adapter.notifyDataSetChanged();
     }
 
+
     // ============================================================
-    // PUBLIC BUTTON METHODS
+    // RADIO BUTTON
     // ============================================================
 
-    public void openRadio(View view) {
+    public void openRadio(
+            View view) {
+
+        exitFullscreen();
 
         showRadioList();
     }
 
-    public void openTv(View view) {
+
+    // ============================================================
+    // TV BUTTON
+    // ============================================================
+
+    public void openTv(
+            View view) {
+
+        exitFullscreen();
 
         showTvList();
     }
+
+
+    // ============================================================
+    // ROTATE / FULLSCREEN
+    // ============================================================
+
+    private void toggleOrientation() {
+
+        if (getResources()
+                .getConfiguration()
+                .orientation
+                ==
+                Configuration.ORIENTATION_LANDSCAPE) {
+
+            exitFullscreen();
+
+            setRequestedOrientation(
+                    ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+            );
+
+        } else {
+
+            setRequestedOrientation(
+                    ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+            );
+
+            enterFullscreen();
+        }
+    }
+
+
+    // ============================================================
+    // ENTER FULLSCREEN
+    // ============================================================
+
+    private void enterFullscreen() {
+
+        getWindow().setFlags(
+                WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN
+        );
+
+
+        getWindow()
+                .getDecorView()
+                .setSystemUiVisibility(
+
+                        View.SYSTEM_UI_FLAG_FULLSCREEN |
+
+                        View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
+
+                        View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY |
+
+                        View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN |
+
+                        View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION |
+
+                        View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                );
+
+
+        if (tvPlayerContainer != null) {
+
+            tvPlayerContainer.setVisibility(
+                    View.VISIBLE
+            );
+        }
+
+
+        hideNonVideoViews(
+                true
+        );
+    }
+
+
+    // ============================================================
+    // EXIT FULLSCREEN
+    // ============================================================
+
+    private void exitFullscreen() {
+
+        getWindow().clearFlags(
+                WindowManager.LayoutParams.FLAG_FULLSCREEN
+        );
+
+
+        getWindow()
+                .getDecorView()
+                .setSystemUiVisibility(
+                        View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                );
+
+
+        hideNonVideoViews(
+                false
+        );
+    }
+
+
+    // ============================================================
+    // HIDE OTHER UI DURING FULLSCREEN
+    // ============================================================
+
+    private void hideNonVideoViews(
+            boolean hide) {
+
+        int v =
+                hide
+                        ? View.GONE
+                        : View.VISIBLE;
+
+
+        findViewById(
+                R.id.header
+        ).setVisibility(v);
+
+
+        findViewById(
+                R.id.modeButtons
+        ).setVisibility(v);
+
+
+        searchBox.setVisibility(v);
+
+        nowPlaying.setVisibility(v);
+
+        status.setVisibility(v);
+
+        stopButton.setVisibility(v);
+
+        listView.setVisibility(v);
+
+
+        if (hide) {
+
+            tvPlayerContainer.setVisibility(
+                    View.VISIBLE
+            );
+
+            tvPlayerView.setVisibility(
+                    View.VISIBLE
+            );
+        }
+    }
+
+
+    // ============================================================
+    // SCREEN ROTATION CHANGE
+    // ============================================================
+
+    @Override
+    public void onConfigurationChanged(
+            Configuration newConfig) {
+
+        super.onConfigurationChanged(
+                newConfig
+        );
+
+
+        if (newConfig.orientation ==
+                Configuration.ORIENTATION_LANDSCAPE
+                &&
+                tvMode
+                &&
+                player != null) {
+
+            enterFullscreen();
+
+        } else if (
+                newConfig.orientation ==
+                        Configuration.ORIENTATION_PORTRAIT) {
+
+            exitFullscreen();
+        }
+    }
+
 
     // ============================================================
     // BACK BUTTON
@@ -626,34 +999,37 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
 
-        if (tvWebView != null &&
-                tvWebView.getVisibility() == View.VISIBLE) {
+        if (
+                getResources()
+                        .getConfiguration()
+                        .orientation
+                        ==
+                        Configuration.ORIENTATION_LANDSCAPE
+                        &&
+                        player != null
+        ) {
 
-            if (tvWebView.canGoBack()) {
-
-                tvWebView.goBack();
-
-            } else {
-
-                tvWebView.setVisibility(View.GONE);
-
-                showTvList();
-            }
+            toggleOrientation();
 
             return;
         }
+
 
         if (player != null) {
 
             stopCurrentPlayer();
 
-            status.setText("Stopped");
+            status.setText(
+                    "Stopped"
+            );
 
             return;
         }
 
+
         super.onBackPressed();
     }
+
 
     // ============================================================
     // DESTROY
@@ -663,13 +1039,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
 
         stopCurrentPlayer();
-
-        if (tvWebView != null) {
-
-            tvWebView.stopLoading();
-
-            tvWebView.destroy();
-        }
 
         super.onDestroy();
     }
