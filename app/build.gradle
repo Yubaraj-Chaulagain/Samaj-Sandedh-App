@@ -1,5 +1,29 @@
-plugins { id 'com.android.application' }
-android { namespace 'com.samajsandesh.app'; compileSdk 35
- defaultConfig { applicationId 'com.samajsandesh.app'; minSdk 23; targetSdk 35; versionCode 5; versionName '1.4' }
+plugins {
+    id 'com.android.application'
 }
-dependencies { implementation 'androidx.appcompat:appcompat:1.7.0'; implementation 'androidx.media3:media3-exoplayer:1.5.1'; implementation 'androidx.media3:media3-ui:1.5.1' }
+
+android {
+    namespace 'com.samajsandesh.app'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId 'com.samajsandesh.app'
+        minSdk 23
+        targetSdk 35
+        versionCode 6
+        versionName '1.5'
+    }
+}
+
+dependencies {
+    implementation 'androidx.appcompat:appcompat:1.7.0'
+
+    // Media3 ExoPlayer
+    implementation 'androidx.media3:media3-exoplayer:1.5.1'
+
+    // HLS (.m3u8) TV stream support
+    implementation 'androidx.media3:media3-exoplayer-hls:1.5.1'
+
+    // Player UI
+    implementation 'androidx.media3:media3-ui:1.5.1'
+}
