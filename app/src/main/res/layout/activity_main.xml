@@ -13,7 +13,7 @@
     <!-- ===================================================== -->
 
     <LinearLayout
-        android:id="@+id/header"
+        android:id="@+id/headerLayout"
         android:layout_width="match_parent"
         android:layout_height="56dp"
         android:orientation="horizontal"
@@ -47,7 +47,7 @@
     <!-- ===================================================== -->
 
     <LinearLayout
-        android:id="@+id/modeButtons"
+        android:id="@+id/modeButtonsLayout"
         android:layout_width="match_parent"
         android:layout_height="52dp"
         android:orientation="horizontal"
@@ -124,7 +124,7 @@
     <!-- ===================================================== -->
 
     <FrameLayout
-        android:id="@+id/tvPlayerContainer"
+        android:id="@+id/tvPlayerFrame"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="#000000"
@@ -152,7 +152,7 @@
         <!-- ================================================= -->
 
         <Button
-            android:id="@+id/rotateButton"
+            android:id="@+id/rotateScreenButton"
             android:layout_width="52dp"
             android:layout_height="52dp"
             android:layout_gravity="top|end"
