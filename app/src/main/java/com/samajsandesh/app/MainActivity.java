@@ -230,13 +230,13 @@ public class MainActivity extends AppCompatActivity {
                     PlaybackException error) {
 
                 status.setText(
-                        "❌ Stream error: "
-                                + error.errorCodeName
-                                + " | "
-                                + (error.getMessage() == null
-                                ? ""
-                                : error.getMessage())
-                );
+        "❌ Stream error: "
+                + PlaybackException.getErrorCodeName(error.errorCode)
+                + " | "
+                + (error.getMessage() == null
+                ? ""
+                : error.getMessage())
+);
             }
 
             @Override
