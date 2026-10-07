@@ -7,13 +7,13 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.media3.common.MediaItem;
+import androidx.media3.common.MimeTypes;
 import androidx.media3.common.PlaybackException;
 import androidx.media3.common.Player;
 import androidx.media3.exoplayer.ExoPlayer;
@@ -48,12 +48,12 @@ public class MainActivity extends AppCompatActivity {
     };
 
     private final String[][] tv = {
-        {"Nepal TV HD","https://nepaltv.nettvnepal.com.np/notoken/netNTV.stream/chunks.m3u8"},
-        {"NTV Plus HD","https://nepaltv.nettvnepal.com.np/notoken/netNTVPlus.stream/chunks.m3u8"},
+        {"Nepal TV HD","https://nepaltv.nettvnepal.com.np/notoken/NTVNEPAL1500.stream/chunks.m3u8"},
+        {"NTV Plus HD","https://nepaltv.nettvnepal.com.np/notoken/hd-NtvPlus-1500.stream/chunks.m3u8"},
         {"NTV News HD","https://nepaltv.nettvnepal.com.np/notoken/hd-NtvNews-1500.stream/chunks.m3u8"},
         {"NTV Kohalpur HD","https://nepaltv.nettvnepal.com.np/notoken/netNTVKOHALPUR1500.stream/chunks.m3u8"},
         {"NTV Itahari HD","https://nepaltv.nettvnepal.com.np/notoken/ntvithari.stream/chunks.m3u8"},
-        {"Kantipur TV HD","https://ktvhdnpicc6670.ekantipur.com/ktv_abr/hd/kantipurtv/hd_1080/playlist.m3u8"},
+        {"Kantipur TV HD","https://ktvhdnpicc66.ekantipur.com/ktv_abr/hd/playlist.m3u8"},
         {"Kantipur TV 720p","https://ktvhdnpicc6670.ekantipur.com/ktv_abr/hd/kantipurtv/hd_720/chunks.m3u8"},
         {"News24 Nepal","http://maxotts.maxdigitaltv.com/x-media/C9/master.m3u8"},
         {"Public 4K TV","http://103.180.240.141:8080/hls/main1/playlist.m3u8"}
@@ -86,11 +86,20 @@ public class MainActivity extends AppCompatActivity {
         });
 
         search.addTextChangedListener(new TextWatcher() {
-            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {
+            @Override
+            public void beforeTextChanged(
+                    CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(
+                    CharSequence s, int start, int before, int count) {
                 refresh(s.toString());
             }
-            @Override public void afterTextChanged(Editable s) {}
+
+            @Override
+            public void afterTextChanged(Editable s) {
+            }
         });
 
         findViewById(R.id.play).setOnClickListener(v -> playSelected());
@@ -107,25 +116,35 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void switchMode() {
+
         if (tvMode) {
             videoPlayer.setVisibility(View.VISIBLE);
             audioControls.setVisibility(View.GONE);
+
             nowPlaying.setText("📺 Live TV Player");
             status.setText("TV channel छान्नुहोस्");
+
         } else {
+
             videoPlayer.setVisibility(View.GONE);
             audioControls.setVisibility(View.VISIBLE);
+
             nowPlaying.setText("📻 Radio Audio Player");
             status.setText("Radio छान्नुहोस्");
         }
     }
 
     private void refresh(String query) {
+
         ArrayList<String> names = new ArrayList<>();
+
         String[][] source = tvMode ? tv : radio;
 
         for (String[] item : source) {
-            if (item[0].toLowerCase().contains(query.toLowerCase())) {
+
+            if (item[0].toLowerCase()
+                    .contains(query.toLowerCase())) {
+
                 names.add(item[0]);
             }
         }
@@ -138,22 +157,30 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void playSelected() {
+
         if (!online()) {
             status.setText("Please No Internet connection 🙏");
             return;
         }
 
         Object selected = list.getSelectedItem();
+
         if (selected == null) {
-            status.setText(tvMode ? "TV channel छान्नुहोस्" : "Radio छान्नुहोस्");
+            status.setText(
+                    tvMode
+                            ? "TV channel छान्नुहोस्"
+                            : "Radio छान्नुहोस्"
+            );
             return;
         }
 
         String name = selected.toString();
         String url = "";
+
         String[][] source = tvMode ? tv : radio;
 
         for (String[] item : source) {
+
             if (item[0].equals(name)) {
                 url = item[1];
                 break;
@@ -161,7 +188,9 @@ public class MainActivity extends AppCompatActivity {
         }
 
         if (url.isEmpty()) {
-            status.setText("Direct stream URL उपलब्ध छैन।");
+            status.setText(
+                    "Direct stream URL उपलब्ध छैन।"
+            );
             return;
         }
 
@@ -176,45 +205,114 @@ public class MainActivity extends AppCompatActivity {
         }
 
         player.addListener(new Player.Listener() {
+
             @Override
-            public void onPlayerError(PlaybackException error) {
-                status.setText("❌ यो stream अहिले चल्न सकेन। अर्को channel छान्नुहोस्।");
+            public void onPlayerError(
+                    PlaybackException error) {
+
+                status.setText(
+                        "❌ यो stream अहिले चल्न सकेन। "
+                                + "अर्को channel छान्नुहोस्।"
+                );
             }
 
             @Override
-            public void onPlaybackStateChanged(int state) {
+            public void onPlaybackStateChanged(
+                    int state) {
+
                 if (state == Player.STATE_BUFFERING) {
-                    status.setText("⏳ Loading: " + name);
+
+                    status.setText(
+                            "⏳ Loading: " + name
+                    );
+
                 } else if (state == Player.STATE_READY) {
-                    status.setText("▶️ Playing: " + name);
+
+                    status.setText(
+                            "▶️ Playing: " + name
+                    );
                 }
             }
         });
 
         try {
-            player.setMediaItem(MediaItem.fromUri(url));
+
+            /*
+             * TV = HLS (.m3u8)
+             * Radio = normal audio stream
+             */
+
+            MediaItem mediaItem;
+
+            if (tvMode) {
+
+                mediaItem = new MediaItem.Builder()
+                        .setUri(url)
+                        .setMimeType(
+                                MimeTypes.APPLICATION_M3U8
+                        )
+                        .build();
+
+            } else {
+
+                mediaItem = new MediaItem.Builder()
+                        .setUri(url)
+                        .setMimeType(
+                                MimeTypes.AUDIO_MPEG
+                        )
+                        .build();
+            }
+
+            player.setMediaItem(mediaItem);
+
             player.prepare();
             player.play();
-            nowPlaying.setText((tvMode ? "📺 " : "📻 ") + name);
+
+            nowPlaying.setText(
+                    (tvMode ? "📺 " : "📻 ") + name
+            );
+
         } catch (Exception e) {
-            status.setText("❌ Stream error");
+
+            status.setText(
+                    "❌ Stream error"
+            );
         }
     }
 
     private boolean online() {
-        ConnectivityManager cm =
-                (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
 
-        NetworkCapabilities nc = cm.getNetworkCapabilities(cm.getActiveNetwork());
+        ConnectivityManager cm =
+                (ConnectivityManager)
+                        getSystemService(
+                                CONNECTIVITY_SERVICE
+                        );
+
+        NetworkCapabilities nc =
+                cm.getNetworkCapabilities(
+                        cm.getActiveNetwork()
+                );
 
         return nc != null &&
-                (nc.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
-                || nc.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)
-                || nc.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET));
+                (
+                        nc.hasTransport(
+                                NetworkCapabilities.TRANSPORT_WIFI
+                        )
+                        ||
+                        nc.hasTransport(
+                                NetworkCapabilities.TRANSPORT_CELLULAR
+                        )
+                        ||
+                        nc.hasTransport(
+                                NetworkCapabilities.TRANSPORT_ETHERNET
+                        )
+                );
     }
 
     private void releasePlayer() {
+
         if (player != null) {
+
             player.release();
             player = null;
         }
@@ -222,7 +320,9 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
+
         releasePlayer();
+
         super.onDestroy();
     }
 }
