@@ -4,24 +4,29 @@ plugins {
 
 android {
     namespace 'com.samajsandesh.app'
+
     compileSdk 35
 
     defaultConfig {
         applicationId 'com.samajsandesh.app'
+
         minSdk 23
         targetSdk 35
+
         versionCode 7
-        versionName '1.6'
+        versionName '1.7'
     }
 }
 
 dependencies {
+
+    // AndroidX
     implementation 'androidx.appcompat:appcompat:1.7.0'
 
     // Media3 ExoPlayer
     implementation 'androidx.media3:media3-exoplayer:1.5.1'
 
-    // HLS (.m3u8) TV stream support
+    // HLS / M3U8 support
     implementation 'androidx.media3:media3-exoplayer-hls:1.5.1'
 
     // Player UI
